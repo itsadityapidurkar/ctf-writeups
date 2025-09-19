@@ -5,10 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CTF Details</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     .neon-hover:hover {
       box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
       transition: all 0.3s ease-in-out;
+    }
+    pre {
+      background-color: #1f2937;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+    }
+    code {
+      color: #34d399;
     }
   </style>
 </head>
@@ -25,7 +35,10 @@
   </div>
 
   <!-- Details -->
-  <main class="p-6 flex-grow" id="ctf-content"></main>
+  <main class="p-6 flex-grow">
+    <div id="ctf-content"></div>
+    <div id="md-viewer" class="mt-6 p-6 bg-gray-900 rounded-2xl shadow-lg hidden overflow-auto max-h-[60vh]"></div>
+  </main>
 
   <!-- Footer -->
   <footer class="p-6 text-center border-t border-green-400 text-gray-500">
@@ -33,13 +46,13 @@
   </footer>
 
   <script>
-    // Get CTF id from URL
     const params = new URLSearchParams(window.location.search);
     const ctfId = params.get("id");
 
     const nameEl = document.getElementById("ctf-name");
     const bannerEl = document.getElementById("banner");
     const contentEl = document.getElementById("ctf-content");
+    const mdViewer = document.getElementById("md-viewer");
 
     function renderCTF(ctf) {
       nameEl.textContent = ctf.name;
@@ -56,13 +69,31 @@
           <div class="mb-6">
             <h2 class="text-xl text-green-400 font-semibold mb-2">${category}</h2>
             <ul class="list-disc list-inside text-sm text-gray-300">
-              ${challenges.map(ch => `<li><a href="${ch.path}" target="_blank" class="text-blue-400 hover:underline">${ch.title}</a></li>`).join("")}
+              ${challenges.map(ch => `<li><button class="text-blue-400 hover:underline challenge-btn" data-path="${ch.path}">${ch.title}</button></li>`).join("")}
             </ul>
           </div>
         `;
       }
 
       contentEl.innerHTML = html;
+
+      // Add click listeners to challenges
+      document.querySelectorAll(".challenge-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const path = btn.dataset.path;
+          fetch(path)
+            .then(res => res.text())
+            .then(md => {
+              mdViewer.innerHTML = marked.parse(md);
+              mdViewer.classList.remove("hidden");
+              mdViewer.scrollIntoView({behavior: "smooth"});
+            })
+            .catch(err => {
+              mdViewer.innerHTML = "<p class='text-red-500'>Failed to load markdown.</p>";
+              mdViewer.classList.remove("hidden");
+            });
+        });
+      });
     }
 
     // Load index.json and find this CTF
