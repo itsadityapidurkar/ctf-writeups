@@ -1,1 +1,43 @@
-
+[
+  {
+    "id": "picoctf",
+    "name": "picoCTF",
+    "status": "ended",
+    "banner": "assets/picoctf.png",
+    "categories": {
+      "General Skills": [
+        {
+          "title": "firstfind",
+          "path": "picoCTF/General Skills/firstfind.md"
+        },
+        {
+          "title": "2warm",
+          "path": "picoCTF/General Skills/2warm.md"
+        },
+        {
+          "title": "firstgrep",
+          "path": "picoCTF/General Skills/firstgrep.md"
+        },
+        {
+          "title": "asciinumbers",
+          "path": "picoCTF/General Skills/asciinumbers.md"
+        },
+        {
+          "title": "bigzip",
+          "path": "picoCTF/General Skills/bigzip.md"
+        },
+        {
+          "title": "bases",
+          "path": "picoCTF/General Skills/bases.md"
+        }
+      ]
+    }
+  },
+  {
+    "id": "imaginaryctf",
+    "name": "imaginaryCTF",
+    "status": "ended",
+    "banner": "assets/imaginaryctf.png",
+    "categories": {}
+  }
+]
