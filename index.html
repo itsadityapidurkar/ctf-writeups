@@ -1,1 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CTF Writeups</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lunr/lunr.js"></script>
+  <style>
+    .neon-hover:hover {
+      box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
+      transition: all 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-black text-gray-200 font-mono">
+  <!-- Header -->
+  <header class="w-full p-6 border-b border-green-400 flex flex-col md:flex-row justify-between items-center gap-4">
+    <h1 class="text-3xl font-bold text-green-400 tracking-widest">CTF Writeups</h1>
+    <div class="flex items-center gap-4">
+      <input 
+        id="search" 
+        type="text" 
+        placeholder="Search CTFs / Challenges..." 
+        class="px-4 py-2 rounded bg-gray-900 text-green-300 border border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-64"
+      />
+      <select id="sort" class="px-3 py-2 bg-gray-900 text-green-300 border border-green-600 rounded">
+        <option value="az">Sort: A–Z</option>
+        <option value="za">Sort: Z–A</option>
+        <option value="status">Sort: Status</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="p-6">
+    <div id="ctf-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="loading" class="text-center text-green-400 mt-6 hidden">Loading more...</div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 p-6 text-center border-t border-green-400 text-gray-500">
+    <p>© 2025 CTF Writeups | Built with ⚡ Tailwind & Lunr.js</p>
+  </footer>
+
+  <script>
+    let ctfs = [];
+    let idx;
+    let loaded = 0;
+    const step = 6; // cards per batch
+    const grid = document.getElementById("ctf-grid");
+
+    async function loadData() {
+      const res = await fetch("index.json");
+      ctfs = await res.json();
+
+      buildIndex();
+      loadMore();
+    }
+
+    function buildIndex() {
+      idx = lunr(function () {
+        this.field("name");
+        this.field("status");
+        this.field("challenge");
+        this.ref("id");
+
+        ctfs.forEach((ctf, i) => {
+          this.add({
+            id: i,
+            name: ctf.name,
+            status: ctf.status,
+            challenge: Object.values(ctf.categories).flat().map(c => c.title).join(" ")
+          });
+        });
+      });
+    }
+
+    function renderCTF(ctf) {
+      const div = document.createElement("div");
+      div.className = "ctf-card neon-hover bg-gray-900 border border-green-700 rounded-2xl shadow-lg overflow-hidden cursor-pointer";
+      div.innerHTML = `
+        <img src="${ctf.banner}" alt="${ctf.name}" class="w-full h-40 object-cover">
+        <div class="p-4">
+          <h2 class="text-xl font-semibold text-green-400">${ctf.name}</h2>
+          <p class="text-sm text-gray-400">Status: ${ctf.status}</p>
+        </div>
+      `;
+      div.addEventListener("click", () => {
+        window.location.href = \`ctf.html?id=\${ctf.id}\`;
+      });
+      return div;
+    }
+
+    function loadMore() {
+      const slice = ctfs.slice(loaded, loaded + step);
+      slice.forEach(ctf => grid.appendChild(renderCTF(ctf)));
+      loaded += slice.length;
+      if (loaded >= ctfs.length) document.getElementById("loading").classList.add("hidden");
+    }
+
+    // Infinite scroll
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        document.getElementById("loading").classList.remove("hidden");
+        setTimeout(loadMore, 300);
+      }
+    });
+
+    // Search
+    document.getElementById("search").addEventListener("input", e => {
+      const query = e.target.value;
+      grid.innerHTML = "";
+      if (!query) {
+        loaded = 0;
+        loadMore();
+        return;
+      }
+      const results = idx.search(\`*\${query}*\`);
+      results.forEach(r => {
+        const ctf = ctfs[r.ref];
+        grid.appendChild(renderCTF(ctf));
+      });
+    });
+
+    // Sort
+    document.getElementById("sort").addEventListener("change", e => {
+      const type = e.target.value;
+      let sorted = [...ctfs];
+      if (type === "az") sorted.sort((a,b) => a.name.localeCompare(b.name));
+      if (type === "za") sorted.sort((a,b) => b.name.localeCompare(a.name));
+      if (type === "status") sorted.sort((a,b) => a.status.localeCompare(b.status));
+      grid.innerHTML = "";
+      sorted.forEach(ctf => grid.appendChild(renderCTF(ctf)));
+    });
+
+    // "/" focuses search
+    window.addEventListener("keydown", e => {
+      if (e.key === "/") {
+        e.preventDefault();
+        document.getElementById("search").focus();
+      }
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
 
