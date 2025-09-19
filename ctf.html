@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CTF Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-gray-200 font-mono">
+  <main class="p-6 max-w-4xl mx-auto">
+    <a href="index.html" class="text-green-400 hover:underline">&larr; Back to all CTFs</a>
+    <div id="ctf-info" class="mt-6"></div>
+  </main>
 
+  <script>
+    async function loadCTF() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
+
+      const data = await fetch("index.json").then(r => r.json());
+      const ctf = data.find(c => c.id === id);
+
+      if (!ctf) {
+        document.getElementById("ctf-info").innerHTML = `<p class="text-red-500">CTF not found.</p>`;
+        return;
+      }
+
+      let html = `
+        <h1 class="text-3xl font-bold text-green-400 mb-4">${ctf.name}</h1>
+        <img src="${ctf.banner}" alt="${ctf.name}" class="w-full max-h-60 object-cover rounded-lg mb-6">
+        <p class="text-gray-400 mb-6">Status: ${ctf.status}</p>
+      `;
+
+      for (const [category, challenges] of Object.entries(ctf.categories)) {
+        html += `
+          <h2 class="text-2xl text-green-300 mt-6 mb-2">${category}</h2>
+          <ul class="list-disc list-inside text-sm text-gray-400 space-y-1">
+            ${challenges.map(ch => `<li><a href="${ch.path}" target="_blank" class="text-green-400 hover:underline">${ch.title}</a></li>`).join("")}
+          </ul>
+        `;
+      }
+
+      document.getElementById("ctf-info").innerHTML = html;
+    }
+
+    loadCTF();
+  </script>
+</body>
+</html>
