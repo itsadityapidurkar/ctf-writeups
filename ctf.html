@@ -5,45 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CTF Details</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .neon-hover:hover {
+      box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
+      transition: all 0.3s ease-in-out;
+    }
+  </style>
 </head>
 <body class="bg-black text-gray-200 font-mono">
-  <main class="p-6 max-w-4xl mx-auto">
-    <a href="index.html" class="text-green-400 hover:underline">&larr; Back to all CTFs</a>
-    <div id="ctf-info" class="mt-6"></div>
-  </main>
+  <!-- Header -->
+  <header class="w-full p-6 border-b border-green-400 flex items-center justify-between">
+    <h1 id="ctf-name" class="text-3xl font-bold text-green-400 tracking-widest"></h1>
+    <a href="index.html" class="text-green-400 hover:underline">⬅ Back</a>
+  </header>
+
+  <!-- Banner -->
+  <div id="banner" class="w-full h-48 bg-gray-800 flex items-center justify-center">
+    <p class="text-gray-500">Loading...</p>
+  </div>
+
+  <!-- Details -->
+  <main class="p-6" id="ctf-content"></main>
+
+  <!-- Footer -->
+  <footer class="mt-12 p-6 text-center border-t border-green-400 text-gray-500">
+    <p>© 2025 CTF Writeups | Built with ⚡ Tailwind</p>
+  </footer>
 
   <script>
-    async function loadCTF() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get("id");
+    // Get CTF id from URL
+    const params = new URLSearchParams(window.location.search);
+    const ctfId = params.get("id");
 
-      const data = await fetch("index.json").then(r => r.json());
-      const ctf = data.find(c => c.id === id);
+    const nameEl = document.getElementById("ctf-name");
+    const bannerEl = document.getElementById("banner");
+    const contentEl = document.getElementById("ctf-content");
 
-      if (!ctf) {
-        document.getElementById("ctf-info").innerHTML = `<p class="text-red-500">CTF not found.</p>`;
-        return;
-      }
+    function renderCTF(ctf) {
+      nameEl.textContent = ctf.name;
 
-      let html = `
-        <h1 class="text-3xl font-bold text-green-400 mb-4">${ctf.name}</h1>
-        <img src="${ctf.banner}" alt="${ctf.name}" class="w-full max-h-60 object-cover rounded-lg mb-6">
-        <p class="text-gray-400 mb-6">Status: ${ctf.status}</p>
-      `;
+      // Banner
+      bannerEl.innerHTML = `<img src="${ctf.banner}" alt="${ctf.name}" class="w-full h-48 object-cover">`;
 
+      // Status
+      let html = `<p class="text-gray-400 mb-4">Status: <span class="text-green-400">${ctf.status}</span></p>`;
+
+      // Categories + Challenges
       for (const [category, challenges] of Object.entries(ctf.categories)) {
         html += `
-          <h2 class="text-2xl text-green-300 mt-6 mb-2">${category}</h2>
-          <ul class="list-disc list-inside text-sm text-gray-400 space-y-1">
-            ${challenges.map(ch => `<li><a href="${ch.path}" target="_blank" class="text-green-400 hover:underline">${ch.title}</a></li>`).join("")}
-          </ul>
+          <div class="mb-6">
+            <h2 class="text-xl text-green-400 font-semibold mb-2">${category}</h2>
+            <ul class="list-disc list-inside text-sm text-gray-300">
+              ${challenges.map(ch => `<li><a href="${ch.path}" target="_blank" class="text-blue-400 hover:underline">${ch.title}</a></li>`).join("")}
+            </ul>
+          </div>
         `;
       }
 
-      document.getElementById("ctf-info").innerHTML = html;
+      contentEl.innerHTML = html;
     }
 
-    loadCTF();
+    // Load index.json and find this CTF
+    fetch("index.json")
+      .then(res => res.json())
+      .then(data => {
+        const ctf = data.find(c => c.id === ctfId);
+        if (ctf) {
+          renderCTF(ctf);
+        } else {
+          contentEl.innerHTML = "<p class='text-red-500'>❌ CTF not found.</p>";
+        }
+      })
+      .catch(err => {
+        console.error("❌ Failed to load index.json:", err);
+        contentEl.innerHTML = "<p class='text-red-500'>Error loading data.</p>";
+      });
   </script>
 </body>
 </html>
