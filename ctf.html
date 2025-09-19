@@ -6,20 +6,28 @@
   <title>CTF Details</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <style>
     .neon-hover:hover {
       box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
       transition: all 0.3s ease-in-out;
     }
-    pre {
+    #md-viewer pre {
       background-color: #1f2937;
-      padding: 0.5rem;
+      padding: 1rem;
       border-radius: 0.5rem;
       overflow-x: auto;
     }
-    code {
+    #md-viewer code {
       color: #34d399;
     }
+    #md-viewer h1 { @apply text-2xl font-bold text-green-400 mt-4 mb-2; }
+    #md-viewer h2 { @apply text-xl font-semibold text-green-400 mt-3 mb-2; }
+    #md-viewer h3 { @apply text-lg font-semibold text-green-300 mt-2 mb-1; }
+    #md-viewer p  { @apply text-gray-300 my-1; }
+    #md-viewer a  { @apply text-blue-400 hover:underline; }
+    #md-viewer ul { @apply list-disc list-inside ml-4; }
   </style>
 </head>
 <body class="bg-black text-gray-200 font-mono min-h-screen flex flex-col">
@@ -37,7 +45,7 @@
   <!-- Details -->
   <main class="p-6 flex-grow">
     <div id="ctf-content"></div>
-    <div id="md-viewer" class="mt-6 p-6 bg-gray-900 rounded-2xl shadow-lg hidden overflow-auto max-h-[60vh]"></div>
+    <div id="md-viewer" class="mt-6 p-6 bg-gray-900 rounded-2xl shadow-lg hidden overflow-auto max-h-[70vh]"></div>
   </main>
 
   <!-- Footer -->
@@ -56,14 +64,10 @@
 
     function renderCTF(ctf) {
       nameEl.textContent = ctf.name;
-
-      // Banner
       bannerEl.innerHTML = `<img src="${ctf.banner}" alt="${ctf.name}" class="w-full h-48 object-cover">`;
 
-      // Status
       let html = `<p class="text-gray-400 mb-4">Status: <span class="text-green-400">${ctf.status}</span></p>`;
 
-      // Categories + Challenges
       for (const [category, challenges] of Object.entries(ctf.categories)) {
         html += `
           <div class="mb-6">
@@ -77,7 +81,6 @@
 
       contentEl.innerHTML = html;
 
-      // Add click listeners to challenges
       document.querySelectorAll(".challenge-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const path = btn.dataset.path;
@@ -86,6 +89,7 @@
             .then(md => {
               mdViewer.innerHTML = marked.parse(md);
               mdViewer.classList.remove("hidden");
+              Prism.highlightAll(); // Syntax highlight code blocks
               mdViewer.scrollIntoView({behavior: "smooth"});
             })
             .catch(err => {
@@ -96,19 +100,15 @@
       });
     }
 
-    // Load index.json and find this CTF
     fetch("index.json")
       .then(res => res.json())
       .then(data => {
         const ctf = data.find(c => c.id === ctfId);
-        if (ctf) {
-          renderCTF(ctf);
-        } else {
-          contentEl.innerHTML = "<p class='text-red-500'>❌ CTF not found.</p>";
-        }
+        if (ctf) renderCTF(ctf);
+        else contentEl.innerHTML = "<p class='text-red-500'>❌ CTF not found.</p>";
       })
       .catch(err => {
-        console.error("❌ Failed to load index.json:", err);
+        console.error(err);
         contentEl.innerHTML = "<p class='text-red-500'>Error loading data.</p>";
       });
   </script>
