@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CTF Writeups</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lunr/lunr.js"></script>
   <style>
     .neon-hover:hover {
       box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
@@ -16,6 +17,19 @@
   <!-- Header -->
   <header class="w-full p-6 border-b border-green-400 flex flex-col md:flex-row justify-between items-center gap-4">
     <h1 class="text-3xl font-bold text-green-400 tracking-widest">CTF Writeups</h1>
+    <div class="flex items-center gap-4">
+      <input 
+        id="search" 
+        type="text" 
+        placeholder="Search CTFs..." 
+        class="px-4 py-2 rounded bg-gray-900 text-green-300 border border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-64"
+      />
+      <select id="sort" class="px-3 py-2 bg-gray-900 text-green-300 border border-green-600 rounded">
+        <option value="az">Sort: A–Z</option>
+        <option value="za">Sort: Z–A</option>
+        <option value="status">Sort: Status</option>
+      </select>
+    </div>
   </header>
 
   <!-- Main Grid -->
@@ -31,6 +45,7 @@
   <script>
     let ctfs = [];
     const grid = document.getElementById("ctf-grid");
+    let idx;
 
     function renderCTF(ctf) {
       const div = document.createElement("div");
@@ -59,11 +74,56 @@
       .then(res => res.json())
       .then(data => {
         ctfs = data;
+
+        // Build search index
+        idx = lunr(function () {
+          this.field("name");
+          this.field("status");
+          this.ref("id");
+          ctfs.forEach((ctf, i) => {
+            this.add({
+              id: ctf.id,
+              name: ctf.name,
+              status: ctf.status
+            });
+          });
+        });
+
         renderAll(ctfs);
       })
       .catch(err => {
         console.error("❌ Failed to load index.json:", err);
       });
+
+    // Search
+    document.getElementById("search").addEventListener("input", e => {
+      const query = e.target.value.trim();
+      if (!query) {
+        renderAll(ctfs);
+        return;
+      }
+      const results = idx.search(`*${query}*`);
+      const filtered = results.map(r => ctfs.find(c => c.id === r.ref));
+      renderAll(filtered);
+    });
+
+    // Sort
+    document.getElementById("sort").addEventListener("change", e => {
+      const type = e.target.value;
+      let sorted = [...ctfs];
+      if (type === "az") sorted.sort((a,b) => a.name.localeCompare(b.name));
+      if (type === "za") sorted.sort((a,b) => b.name.localeCompare(a.name));
+      if (type === "status") sorted.sort((a,b) => a.status.localeCompare(b.status));
+      renderAll(sorted);
+    });
+
+    // "/" focuses search
+    window.addEventListener("keydown", e => {
+      if (e.key === "/") {
+        e.preventDefault();
+        document.getElementById("search").focus();
+      }
+    });
   </script>
 </body>
 </html>
