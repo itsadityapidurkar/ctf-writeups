@@ -11,6 +11,13 @@
     "name": "picoCTF",
     "status": "ended",
     "banner": "assets/placeholder.png",
-    "categories": {}
+    "categories": {
+      "General Skills": [
+        {
+          "title": "challenge",
+          "path": "picoCTF/General Skills/challenge.html"
+        }
+      ]
+    }
   }
 ]
