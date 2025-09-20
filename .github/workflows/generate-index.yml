@@ -16,24 +16,29 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
-      - name: Generate index.json
+      - name: Install dependencies (none required) and run generator
         run: |
-          python scripts/generate_index.py
+          python3 scripts/generate_index.py
 
-      - name: Commit and push changes
+      - name: Commit and push changes if index.json changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [[ `git status --porcelain index.json` ]]; then
+          if [[ -n "$(git status --porcelain index.json)" ]]; then
             git add index.json
             git commit -m "Auto-update index.json"
             git push
+            echo "✅ index.json updated and pushed"
           else
-            echo "✅ No changes in index.json"
+            echo "✅ No changes to index.json"
           fi
