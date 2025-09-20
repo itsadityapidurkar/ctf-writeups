@@ -21,8 +21,8 @@
       <input 
         id="search" 
         type="text" 
-        placeholder="Search CTFs..." 
-        class="px-4 py-2 rounded bg-gray-900 text-green-300 border border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-64"
+        placeholder="Search CTFs or challenge titles..." 
+        class="px-4 py-2 rounded bg-gray-900 text-green-300 border border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-72"
       />
       <select id="sort" class="px-3 py-2 bg-gray-900 text-green-300 border border-green-600 rounded">
         <option value="az">Sort: A–Z</option>
@@ -44,10 +44,11 @@
 
   <script>
     let ctfs = [];
+    let idx = null;
     const grid = document.getElementById("ctf-grid");
-    let idx;
 
     function renderCTF(ctf) {
+      const categoryCount = Object.keys(ctf.categories || {}).length;
       const div = document.createElement("div");
       div.className = "ctf-card neon-hover bg-gray-900 border border-green-700 rounded-2xl shadow-lg overflow-hidden cursor-pointer";
       div.innerHTML = `
@@ -55,59 +56,89 @@
         <div class="p-4">
           <h2 class="text-xl font-semibold text-green-400">${ctf.name}</h2>
           <p class="text-sm text-gray-400">Status: ${ctf.status}</p>
-          <p class="text-xs text-green-500 mt-2">${Object.keys(ctf.categories).length} categories</p>
+          <p class="text-xs text-green-500 mt-2">${categoryCount} categories</p>
         </div>
       `;
-      div.onclick = () => {
-        window.location.href = `ctf.html?id=${ctf.id}`;
-      };
+      div.onclick = () => { window.location.href = `ctf.html?id=${ctf.id}`; };
       return div;
     }
 
-    function renderAll(ctfsList) {
+    function renderAll(list) {
       grid.innerHTML = "";
-      ctfsList.forEach(ctf => grid.appendChild(renderCTF(ctf)));
+      if (!list || list.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-gray-400">No CTFs found.</div>`;
+        return;
+      }
+      list.forEach(ctf => grid.appendChild(renderCTF(ctf)));
     }
 
-    // Load data from index.json
+    // build lunr index over ctf name + challenge titles text
+    function buildIndex() {
+      idx = lunr(function(){
+        this.ref('id');
+        this.field('name');
+        this.field('challenges');
+        ctfs.forEach(ctf => {
+          const challengesText = Object.values(ctf.categories || {}).flat().map(c => c.title).join(" ");
+          this.add({
+            id: ctf.id,
+            name: ctf.name,
+            challenges: challengesText
+          });
+        });
+      });
+    }
+
+    // fetch index.json and initialize
     fetch("index.json")
       .then(res => res.json())
       .then(data => {
-        ctfs = data;
-
-        // Build search index
-        idx = lunr(function () {
-          this.field("name");
-          this.field("status");
-          this.ref("id");
-          ctfs.forEach((ctf, i) => {
-            this.add({
-              id: ctf.id,
-              name: ctf.name,
-              status: ctf.status
-            });
-          });
-        });
-
+        ctfs = data || [];
+        buildIndex();
+        // default render - sorted A-Z
+        ctfs.sort((a,b) => a.name.localeCompare(b.name));
         renderAll(ctfs);
       })
       .catch(err => {
-        console.error("❌ Failed to load index.json:", err);
+        console.error("Failed to load index.json", err);
+        grid.innerHTML = `<div class="col-span-full text-red-500">Failed to load index.json</div>`;
       });
 
-    // Search
+    // search: use lunr to get matching ctf ids; fallback to substring search
     document.getElementById("search").addEventListener("input", e => {
-      const query = e.target.value.trim();
-      if (!query) {
+      const q = e.target.value.trim();
+      if (!q) {
         renderAll(ctfs);
         return;
       }
-      const results = idx.search(`*${query}*`);
-      const filtered = results.map(r => ctfs.find(c => c.id === r.ref));
+      let results = [];
+      try {
+        results = idx.search(`*${q}*`);
+      } catch(e) {
+        // lunr might throw for special chars - fallback to substring
+        results = [];
+      }
+      let filtered = [];
+      if (results.length) {
+        const ids = new Set(results.map(r => r.ref));
+        filtered = ctfs.filter(c => ids.has(c.id));
+      } else {
+        // fallback substring search over names and challenge titles
+        const qlow = q.toLowerCase();
+        filtered = ctfs.filter(c => {
+          if (c.name.toLowerCase().includes(qlow)) return true;
+          for (const chs of Object.values(c.categories || {})){
+            for (const ch of chs) {
+              if (ch.title.toLowerCase().includes(qlow)) return true;
+            }
+          }
+          return false;
+        });
+      }
       renderAll(filtered);
     });
 
-    // Sort
+    // sort
     document.getElementById("sort").addEventListener("change", e => {
       const type = e.target.value;
       let sorted = [...ctfs];
@@ -117,7 +148,7 @@
       renderAll(sorted);
     });
 
-    // "/" focuses search
+    // focus search on "/"
     window.addEventListener("keydown", e => {
       if (e.key === "/") {
         e.preventDefault();
