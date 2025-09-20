@@ -1,46 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>CTF Details</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script>
-    // Enable Tailwind Typography plugin
-    tailwind.config = {
-      plugins: [tailwindcssTypography],
-    }
-  </script>
   <style>
     .neon-hover:hover {
       box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
       transition: all 0.3s ease-in-out;
     }
+    .iframe-wrap {
+      border: 1px solid rgba(34,197,94,0.15);
+      border-radius: 12px;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body class="bg-black text-gray-200 font-mono min-h-screen flex flex-col">
-  <!-- Header -->
   <header class="w-full p-6 border-b border-green-400 flex items-center justify-between">
-    <h1 id="ctf-name" class="text-3xl font-bold text-green-400 tracking-widest"></h1>
-    <a href="index.html" class="text-green-400 hover:underline">⬅ Back</a>
+    <div>
+      <h1 id="ctf-name" class="text-3xl font-bold text-green-400 tracking-widest"></h1>
+      <p id="ctf-status" class="text-gray-400 text-sm"></p>
+    </div>
+    <div class="flex gap-4 items-center">
+      <a id="open-new" class="text-green-400 hover:underline" target="_blank">Open selected challenge in new tab</a>
+      <a href="index.html" class="text-green-400 hover:underline">⬅ Back</a>
+    </div>
   </header>
 
-  <!-- Banner -->
   <div id="banner" class="w-full h-48 bg-gray-800 flex items-center justify-center">
     <p class="text-gray-500">Loading...</p>
   </div>
 
-  <!-- Details -->
   <main class="p-6 flex-grow">
     <div id="ctf-content"></div>
-    <!-- Markdown Viewer -->
-    <article id="md-viewer" class="prose prose-invert prose-green max-w-none mt-6 p-6 bg-gray-900 rounded-2xl shadow-lg hidden overflow-auto max-h-[70vh]"></article>
+
+    <div id="viewer" class="mt-6 hidden">
+      <div class="mb-2 flex items-center justify-between">
+        <h2 class="text-lg text-green-300">Challenge Preview</h2>
+        <button id="close-view" class="px-3 py-1 bg-gray-900 border border-green-700 rounded text-sm text-green-300">Close</button>
+      </div>
+      <div class="iframe-wrap">
+        <iframe id="challenge-frame" src="" class="w-full h-[70vh]" frameborder="0"></iframe>
+      </div>
+    </div>
   </main>
 
-  <!-- Footer -->
   <footer class="p-6 text-center border-t border-green-400 text-gray-500">
     <p>© 2025 Aditya Pidurkar</p>
   </footer>
@@ -48,60 +54,63 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const ctfId = params.get("id");
-
     const nameEl = document.getElementById("ctf-name");
+    const statusEl = document.getElementById("ctf-status");
     const bannerEl = document.getElementById("banner");
     const contentEl = document.getElementById("ctf-content");
-    const mdViewer = document.getElementById("md-viewer");
+    const viewer = document.getElementById("viewer");
+    const frame = document.getElementById("challenge-frame");
+    const openNew = document.getElementById("open-new");
+    const closeView = document.getElementById("close-view");
 
     function renderCTF(ctf) {
       nameEl.textContent = ctf.name;
+      statusEl.textContent = `Status: ${ctf.status}`;
       bannerEl.innerHTML = `<img src="${ctf.banner}" alt="${ctf.name}" class="w-full h-48 object-cover">`;
 
-      let html = `<p class="text-gray-400 mb-4">Status: <span class="text-green-400">${ctf.status}</span></p>`;
-
-      for (const [category, challenges] of Object.entries(ctf.categories)) {
+      let html = "";
+      for (const [category, challenges] of Object.entries(ctf.categories || {})) {
         html += `
           <div class="mb-6">
-            <h2 class="text-xl text-green-400 font-semibold mb-2">${category}</h2>
+            <h3 class="text-xl text-green-400 font-semibold mb-2">${category}</h3>
             <ul class="list-disc list-inside text-sm text-gray-300">
-              ${challenges.map(ch => `<li><button class="text-blue-400 hover:underline challenge-btn" data-path="${ch.path}">${ch.title}</button></li>`).join("")}
+              ${challenges.map(ch => `<li class="mb-1"><button class="challenge-btn text-blue-400 hover:underline" data-path="${ch.path}">${ch.title}</button></li>`).join("")}
             </ul>
           </div>
         `;
       }
-
       contentEl.innerHTML = html;
 
+      // wire buttons
       document.querySelectorAll(".challenge-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const path = btn.dataset.path;
-          fetch(path)
-            .then(res => res.text())
-            .then(md => {
-              mdViewer.innerHTML = marked.parse(md);
-              mdViewer.classList.remove("hidden");
-              Prism.highlightAll();
-              mdViewer.scrollIntoView({behavior: "smooth"});
-            })
-            .catch(err => {
-              mdViewer.innerHTML = "<p class='text-red-500'>Failed to load markdown.</p>";
-              mdViewer.classList.remove("hidden");
-            });
+          frame.src = path;
+          openNew.href = path;
+          viewer.classList.remove("hidden");
+          viewer.scrollIntoView({behavior: "smooth"});
         });
       });
     }
 
+    closeView.addEventListener("click", () => {
+      frame.src = "about:blank";
+      viewer.classList.add("hidden");
+    });
+
     fetch("index.json")
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
         const ctf = data.find(c => c.id === ctfId);
-        if (ctf) renderCTF(ctf);
-        else contentEl.innerHTML = "<p class='text-red-500'>❌ CTF not found.</p>";
+        if (!ctf) {
+          contentEl.innerHTML = "<p class='text-red-500'>CTF not found</p>";
+          return;
+        }
+        renderCTF(ctf);
       })
       .catch(err => {
         console.error(err);
-        contentEl.innerHTML = "<p class='text-red-500'>Error loading data.</p>";
+        contentEl.innerHTML = "<p class='text-red-500'>Failed to load data</p>";
       });
   </script>
 </body>
