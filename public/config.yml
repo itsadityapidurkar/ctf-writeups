@@ -2,7 +2,7 @@ backend:
   name: github
   repo: itsadityapidurkar/ctf-writeups
   branch: main
-  base_url: https://yourwriteups.vercel.app # CHANGE THIS to your Vercel deployment URL
+  base_url: https://writeups.adityapidurkar.in # Your custom domain on Vercel
   auth_endpoint: api/auth
 
 media_folder: "public/assets"

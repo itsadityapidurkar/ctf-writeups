@@ -42,8 +42,8 @@ To allow logging in securely on your live website's admin panel:
 2. Under the left sidebar, click **Developer settings** -> **OAuth Apps** -> **New OAuth App**.
 3. Fill in the details:
    * **Application Name**: `CTF Writeups Admin`
-   * **Homepage URL**: `https://<your-project-name>.vercel.app`
-   * **Authorization callback URL**: `https://<your-project-name>.vercel.app/api/callback`
+   * **Homepage URL**: `https://writeups.adityapidurkar.in`
+   * **Authorization callback URL**: `https://writeups.adityapidurkar.in/api/callback`
 4. Click **Register application**.
 5. Save the displayed **Client ID**.
 6. Generate and save a **Client Secret**.
@@ -57,13 +57,13 @@ To allow logging in securely on your live website's admin panel:
 
 ### Step 3: Set Your Production URL in Config
 1. Open [public/config.yml](public/config.yml) in your repository.
-2. Edit the `base_url` key to point to your Vercel deployment domain:
+2. Verify the `base_url` key points to your custom domain:
    ```yaml
    backend:
      name: github
      repo: itsadityapidurkar/ctf-writeups
      branch: main
-     base_url: https://<your-project-name>.vercel.app
+     base_url: https://writeups.adityapidurkar.in
      auth_endpoint: api/auth
    ```
 3. Commit and push this change to GitHub. Vercel will rebuild and publish your changes!
@@ -76,7 +76,7 @@ To allow logging in securely on your live website's admin panel:
 You have two ways to add new writeups:
 
 #### Option A: Via Admin Dashboard
-1. Go to `https://your-domain.vercel.app/admin` and log in via GitHub.
+1. Go to `https://writeups.adityapidurkar.in/admin` and log in via GitHub.
 2. Click **New CTF Writeup**.
 3. Fill out the fields (title, category, flag, difficulty, banner name).
 4. Write your solution in Markdown.
