@@ -18,6 +18,14 @@
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" is:inline></script>
 
   <script is:inline>
+    // Diagnostic listener to log all postMessages received by the admin page
+    window.addEventListener('message', (event) => {
+      console.log('📬 Received message event:', {
+        origin: event.origin,
+        data: event.data
+      });
+    }, false);
+
     // Fetch and dynamically configure Decap CMS base_url matching current browser origin
     fetch('/config.yml')
       .then(res => res.text())
