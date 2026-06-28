@@ -46,7 +46,9 @@ export default async function handler(req, res) {
               'authorization:github:success:${JSON.stringify({ token, provider: "github" })}',
               '*'
             );
-            window.close();
+            setTimeout(() => {
+              window.close();
+            }, 100);
           }
         </script>
         <p>Authorized successfully. You can close this window now.</p>
