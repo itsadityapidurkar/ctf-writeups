@@ -4,11 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Manager | CTF Writeups</title>
-  <!-- Tell Decap CMS to load config from /config.yml to prevent Astro route shadowing conflicts -->
-  <link rel="cms-config-url" type="text/yaml" href="/config.yml" />
+  
+  <!-- Load JS-YAML to parse config.yml at runtime -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" is:inline></script>
+  
+  <!-- Prevent Decap CMS from auto-initializing -->
+  <script is:inline>
+    window.CMS_MANUAL_INIT = true;
+  </script>
 </head>
 <body>
   <!-- Include the script that builds the page and powers Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" is:inline></script>
+
+  <script is:inline>
+    // Fetch and dynamically configure Decap CMS base_url matching current browser origin
+    fetch('/config.yml')
+      .then(res => res.text())
+      .then(yamlText => {
+        const config = jsyaml.load(yamlText);
+        
+        // Dynamically match base_url to current domain (localhost, Vercel subdomain, or custom domain)
+        config.backend.base_url = window.location.origin;
+        
+        // Initialize Decap CMS with dynamic config
+        CMS.init({ config });
+      })
+      .catch(err => {
+        console.error('Failed to load CMS configuration dynamically:', err);
+      });
+  </script>
 </body>
 </html>
