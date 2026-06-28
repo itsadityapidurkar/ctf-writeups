@@ -1,0 +1,26 @@
+backend:
+  name: github
+  repo: itsadityapidurkar/ctf-writeups
+  branch: main
+  base_url: https://yourwriteups.vercel.app # CHANGE THIS to your Vercel deployment URL
+  auth_endpoint: api/auth
+
+media_folder: "public/assets"
+public_folder: "/assets"
+
+collections:
+  - name: "writeups"
+    label: "CTF Writeups"
+    folder: "src/content/writeups"
+    create: true
+    slug: "{{slug}}"
+    nested: { depth: 3 }
+    path: "{{ctfId}}/{{category}}/{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "CTF ID", name: "ctfId", widget: "string", hint: "Matching folder name, e.g., picoctf, imaginaryctf" }
+      - { label: "Category", name: "category", widget: "string", hint: "Category folder name, lowercase and hyphenated, e.g., general-skills, forensics" }
+      - { label: "Difficulty", name: "difficulty", widget: "select", options: ["Easy", "Medium", "Hard"], required: false }
+      - { label: "Flag", name: "flag", widget: "string", required: false }
+      - { label: "Banner Image Filename", name: "banner", widget: "string", default: "placeholder.png", hint: "Filename of the banner in assets/, e.g., picoctf.png" }
+      - { label: "Body", name: "body", widget: "markdown" }

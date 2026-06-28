@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import WriteupLayout from '../../../../layouts/WriteupLayout.astro';
+import ctfsData from '../../../../data/ctfs.json';
+
+export async function getStaticPaths() {
+  const allWriteups = await getCollection('writeups');
+  
+  return allWriteups.map(w => {
+    const slugParts = w.slug.split('/');
+    
+    // Resolve CTF ID from frontmatter ctfId or the first directory in the path
+    const ctfId = (w.data.ctfId || slugParts[0]).toLowerCase();
+    
+    // Resolve Category Slug (e.g. general-skills)
+    const rawCategory = w.data.category || (slugParts.length > 2 ? slugParts[1] : 'Uncategorized');
+    const category = rawCategory.toLowerCase().trim().replace(/\s+/g, '-');
+    
+    // Resolve Challenge Slug
+    const slug = slugParts.pop();
+
+    return {
+      params: { ctfId, category, slug },
+      props: { writeup: w, ctfId, categoryName: rawCategory }
+    };
+  });
+}
+
+const { writeup, ctfId, categoryName } = Astro.props;
+const { Content } = await writeup.render();
+
+// Look up the full CTF name
+const ctfMeta = ctfsData.find(c => c.id === ctfId);
+const ctfName = ctfMeta ? ctfMeta.name : ctfId;
+
+// Resolve frontmatter properties with path-based fallbacks
+const title = writeup.data.title || writeup.slug.split('/').pop()?.replace(/-/g, ' ') || 'Untitled';
+const category = writeup.data.category || categoryName;
+const difficulty = writeup.data.difficulty;
+const flag = writeup.data.flag;
+const banner = writeup.data.banner || ctfMeta?.banner;
+---
+
+<WriteupLayout 
+  title={title}
+  ctfName={ctfName}
+  category={category}
+  difficulty={difficulty}
+  flag={flag}
+  banner={banner}
+>
+  <Content />
+</WriteupLayout>

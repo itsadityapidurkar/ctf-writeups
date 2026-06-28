@@ -1,0 +1,135 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import ctfsData from '../../data/ctfs.json';
+
+export async function getStaticPaths() {
+  return ctfsData.map(ctf => ({
+    params: { ctfId: ctf.id },
+    props: { ctf }
+  }));
+}
+
+const { ctfId } = Astro.params;
+const { ctf } = Astro.props;
+
+// Fetch all writeups
+const allWriteups = await getCollection('writeups');
+
+// Filter writeups belonging to this CTF
+const ctfWriteups = allWriteups.filter(w => {
+  const resolvedCtfId = w.data.ctfId || w.slug.split('/')[0].toLowerCase();
+  return resolvedCtfId === ctf.id;
+});
+
+// Group challenges by category
+const categories: Record<string, any[]> = {};
+ctfWriteups.forEach(w => {
+  const rawCategory = w.data.category || w.slug.split('/')[1] || 'Uncategorized';
+  // Standardize category casing
+  const categoryName = rawCategory.trim();
+  
+  if (!categories[categoryName]) {
+    categories[categoryName] = [];
+  }
+
+  const title = w.data.title || w.slug.split('/').pop()?.replace(/-/g, ' ') || 'Untitled';
+  const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-');
+  const challengeSlug = w.slug.split('/').pop();
+  
+  categories[categoryName].push({
+    title,
+    difficulty: w.data.difficulty,
+    flag: w.data.flag,
+    path: `/ctf/${ctf.id}/${categorySlug}/${challengeSlug}`
+  });
+});
+
+// Sort categories alphabetically
+const sortedCategoryNames = Object.keys(categories).sort();
+---
+
+<Layout title={`${ctf.name} Challenges | CTF Archive`}>
+  <div class="space-y-8">
+    
+    <!-- Breadcrumb / Header Navigation -->
+    <div>
+      <a href="/" class="text-green-400 hover:text-green-300 font-mono text-sm group">
+        &lt;-- Back to CTFs
+      </a>
+    </div>
+
+    <!-- Event Banner -->
+    <div class="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-green-500/20 bg-zinc-950 flex items-center justify-center">
+      <img 
+        src={`/assets/${ctf.banner}`} 
+        alt={ctf.name} 
+        class="w-full h-full object-cover opacity-60"
+        onerror="this.src='/assets/placeholder.png'"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+      <div class="absolute inset-y-0 left-8 flex flex-col justify-center space-y-2">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide">
+          {ctf.name}
+        </h1>
+        <div class="flex items-center gap-4 text-sm font-mono">
+          <div class="flex items-center gap-2">
+            <span class={`w-2 h-2 rounded-full ${ctf.status === 'active' ? 'bg-green-500' : 'bg-zinc-500'}`}></span>
+            <span class="text-zinc-300 capitalize">{ctf.status} event</span>
+          </div>
+          <span class="text-zinc-500">|</span>
+          <span class="text-zinc-300">{ctfWriteups.length} writeups archived</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main List content -->
+    <div class="grid grid-cols-1 gap-8">
+      {ctfWriteups.length === 0 ? (
+        <div class="py-16 text-center border border-zinc-900 rounded-2xl bg-zinc-950/40">
+          <p class="text-zinc-500 font-mono">NO_WRITEUPS_YET</p>
+        </div>
+      ) : (
+        sortedCategoryNames.map(category => (
+          <div class="space-y-4 border border-zinc-900/60 p-6 rounded-2xl bg-zinc-950/20">
+            <h2 class="text-xl font-bold font-mono text-green-400 border-b border-zinc-900 pb-2 uppercase tracking-wider">
+              {category}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {categories[category].map(challenge => (
+                <a 
+                  href={challenge.path}
+                  class="group flex items-center justify-between p-4 rounded-xl border border-zinc-900 bg-zinc-950/50 hover:border-green-500/30 hover:bg-zinc-900/30 hover:shadow-[0_0_15px_rgba(57,255,20,0.05)] transition-all duration-300"
+                >
+                  <div class="space-y-1">
+                    <span class="text-white group-hover:text-green-400 font-medium transition-colors break-words block">
+                      {challenge.title}
+                    </span>
+                    <div class="flex gap-3 text-xs font-mono text-zinc-500">
+                      {challenge.difficulty && (
+                        <span class={
+                          challenge.difficulty.toLowerCase() === 'easy' ? 'text-green-500/80' :
+                          challenge.difficulty.toLowerCase() === 'medium' ? 'text-yellow-500/80' :
+                          'text-red-500/80'
+                        }>
+                          {challenge.difficulty}
+                        </span>
+                      )}
+                      {challenge.flag && (
+                        <span>Solved</span>
+                      )}
+                    </div>
+                  </div>
+                  <div class="text-zinc-500 group-hover:text-green-400 transition-colors font-mono">
+                    --&gt;
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+
+  </div>
+</Layout>
