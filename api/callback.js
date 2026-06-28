@@ -41,10 +41,13 @@ export default async function handler(req, res) {
       <body>
         <script>
           const target = window.opener || window.parent;
-          target.postMessage(
-            'authorization:github:success:${JSON.stringify({ token, provider: "github" })}',
-            '*'
-          );
+          if (target) {
+            target.postMessage(
+              'authorization:github:success:${JSON.stringify({ token, provider: "github" })}',
+              '*'
+            );
+            window.close();
+          }
         </script>
         <p>Authorized successfully. You can close this window now.</p>
       </body>
