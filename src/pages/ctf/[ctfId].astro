@@ -54,31 +54,47 @@ const sortedCategoryNames = Object.keys(categories).sort();
     
     <!-- Breadcrumb / Header Navigation -->
     <div>
-      <a href="/" class="text-green-400 hover:text-green-300 font-mono text-sm group">
-        &lt;-- Back to CTFs
+      <a href="/" class="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-mono text-sm group transition-colors">
+        <span class="transform group-hover:-translate-x-1 transition-transform duration-300">&lt;--</span> Back to CTFs
       </a>
     </div>
 
     <!-- Event Banner -->
-    <div class="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-green-500/20 bg-zinc-950 flex items-center justify-center">
-      <img 
-        src={`/assets/${ctf.banner}`} 
-        alt={ctf.name} 
-        class="w-full h-full object-cover opacity-60"
-        onerror="this.src='/assets/placeholder.png'"
-      />
-      <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
-      <div class="absolute inset-y-0 left-8 flex flex-col justify-center space-y-2">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide">
+    <div class="relative w-full h-48 sm:h-56 rounded-3xl overflow-hidden border border-white/5 bg-zinc-950 flex items-center justify-center">
+      <!-- High-fidelity dynamic fallback gradients matching home card styles -->
+      <div class="absolute inset-0 bg-gradient-to-tr from-zinc-950 via-zinc-900 to-zinc-950"></div>
+      
+      {ctfId === 'picoctf' && (
+        <div class="absolute inset-0 bg-gradient-to-tr from-violet-950 via-indigo-900 to-zinc-950 opacity-90"></div>
+        <div class="absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 16px 16px;"></div>
+      )}
+      {ctfId === 'imaginaryctf' && (
+        <div class="absolute inset-0 bg-gradient-to-tr from-emerald-950 via-teal-900 to-zinc-950 opacity-90"></div>
+        <div class="absolute inset-0 opacity-[0.04]" style="background: repeating-linear-gradient(45deg, transparent, transparent 10px, white 10px, white 12px);"></div>
+      )}
+      
+      {ctf.banner && ctf.banner !== 'placeholder.png' && !ctf.banner.includes('placeholder') && (
+        <img 
+          src={`/assets/${ctf.banner}`} 
+          alt={ctf.name} 
+          class="absolute inset-0 w-full h-full object-cover opacity-30"
+          onerror="this.style.display='none'"
+        />
+      )}
+      
+      <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/40 to-transparent"></div>
+      
+      <div class="absolute inset-y-0 left-8 flex flex-col justify-center space-y-2 z-10">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-outfit">
           {ctf.name}
         </h1>
-        <div class="flex items-center gap-4 text-sm font-mono">
+        <div class="flex items-center gap-4 text-xs font-mono text-zinc-400">
           <div class="flex items-center gap-2">
-            <span class={`w-2 h-2 rounded-full ${ctf.status === 'active' ? 'bg-green-500' : 'bg-zinc-500'}`}></span>
-            <span class="text-zinc-300 capitalize">{ctf.status} event</span>
+            <span class={`w-1.5 h-1.5 rounded-full ${ctf.status === 'active' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-zinc-500'}`}></span>
+            <span class="capitalize">{ctf.status} event</span>
           </div>
-          <span class="text-zinc-500">|</span>
-          <span class="text-zinc-300">{ctfWriteups.length} writeups archived</span>
+          <span class="text-zinc-700">|</span>
+          <span>{ctfWriteups.length} writeups archived</span>
         </div>
       </div>
     </div>
@@ -86,41 +102,41 @@ const sortedCategoryNames = Object.keys(categories).sort();
     <!-- Main List content -->
     <div class="grid grid-cols-1 gap-8">
       {ctfWriteups.length === 0 ? (
-        <div class="py-16 text-center border border-zinc-900 rounded-2xl bg-zinc-950/40">
-          <p class="text-zinc-500 font-mono">NO_WRITEUPS_YET</p>
+        <div class="py-16 text-center border border-white/5 rounded-2xl bg-zinc-950/20 backdrop-blur-md">
+          <p class="text-zinc-500 font-mono text-sm">NO_WRITEUPS_YET</p>
         </div>
       ) : (
         sortedCategoryNames.map(category => (
-          <div class="space-y-4 border border-zinc-900/60 p-6 rounded-2xl bg-zinc-950/20">
-            <h2 class="text-xl font-bold font-mono text-green-400 border-b border-zinc-900 pb-2 uppercase tracking-wider">
+          <div class="space-y-5 border border-white/5 p-6 rounded-2xl bg-zinc-950/30 backdrop-blur-md">
+            <h2 class="text-xs font-bold font-mono text-cyan-400 border-b border-white/5 pb-2 uppercase tracking-widest">
               {category}
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categories[category].map(challenge => (
                 <a 
                   href={challenge.path}
-                  class="group flex items-center justify-between p-4 rounded-xl border border-zinc-900 bg-zinc-950/50 hover:border-green-500/30 hover:bg-zinc-900/30 hover:shadow-[0_0_15px_rgba(57,255,20,0.05)] transition-all duration-300"
+                  class="group flex items-center justify-between p-4 rounded-xl border border-white/5 bg-zinc-900/20 hover:border-cyan-500/20 hover:bg-cyan-950/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.02)] transition-all duration-300"
                 >
-                  <div class="space-y-1">
-                    <span class="text-white group-hover:text-green-400 font-medium transition-colors break-words block">
+                  <div class="space-y-1.5">
+                    <span class="text-zinc-200 group-hover:text-white font-medium transition-colors break-words block">
                       {challenge.title}
                     </span>
-                    <div class="flex gap-3 text-xs font-mono text-zinc-500">
+                    <div class="flex gap-3 text-[10px] font-mono tracking-wider uppercase">
                       {challenge.difficulty && (
                         <span class={
-                          challenge.difficulty.toLowerCase() === 'easy' ? 'text-green-500/80' :
-                          challenge.difficulty.toLowerCase() === 'medium' ? 'text-yellow-500/80' :
-                          'text-red-500/80'
+                          challenge.difficulty.toLowerCase() === 'easy' ? 'text-emerald-500 font-semibold' :
+                          challenge.difficulty.toLowerCase() === 'medium' ? 'text-amber-500 font-semibold' :
+                          'text-rose-500 font-semibold'
                         }>
                           {challenge.difficulty}
                         </span>
                       )}
                       {challenge.flag && (
-                        <span>Solved</span>
+                        <span class="text-zinc-500">Solved</span>
                       )}
                     </div>
                   </div>
-                  <div class="text-zinc-500 group-hover:text-green-400 transition-colors font-mono">
+                  <div class="text-zinc-600 group-hover:text-cyan-400 transition-colors font-mono text-sm transform group-hover:translate-x-1 transition-transform duration-300">
                     --&gt;
                   </div>
                 </a>

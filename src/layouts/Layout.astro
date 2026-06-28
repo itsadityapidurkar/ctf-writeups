@@ -17,37 +17,58 @@ const { title } = Astro.props;
   <meta name="description" content="A premium collection of CTF challenge writeups, tutorials, and cyber-security insights." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Outfit for Headings, Inter for Body, Fira Code for Monospace -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style is:global>
     :root {
-      --neon-green: #39ff14;
-      --neon-green-glow: rgba(57, 255, 20, 0.4);
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
+      --accent-violet: #8350f2;
+      --glow-emerald: rgba(16, 185, 129, 0.25);
+      --glow-cyan: rgba(6, 182, 212, 0.25);
     }
     
     body {
-      font-family: 'Outfit', sans-serif;
-      background-color: #050505;
+      font-family: 'Inter', sans-serif;
+      background-color: #07070a;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(20, 50, 20, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(20, 40, 20, 0.1) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+        radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 24px 24px;
+      background-attachment: fixed;
+    }
+
+    .font-outfit {
+      font-family: 'Outfit', sans-serif;
     }
 
     .font-mono {
       font-family: 'Fira Code', monospace;
     }
 
-    .neon-border {
-      border: 1px solid rgba(57, 255, 20, 0.2);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Glow border utilities */
+    .glass-card {
+      background: rgba(15, 15, 25, 0.45);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .neon-border:hover {
-      border-color: var(--neon-green);
-      box-shadow: 0 0 15px var(--neon-green-glow);
+    .glass-card:hover {
+      border-color: rgba(6, 182, 212, 0.3);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.05);
+      transform: translateY(-2px);
+    }
+
+    /* Text gradient clip */
+    .text-gradient-cyan {
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     /* Custom scrollbar */
@@ -56,47 +77,48 @@ const { title } = Astro.props;
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #0d0d0d;
+      background: #07070a;
     }
     ::-webkit-scrollbar-thumb {
-      background: #222;
+      background: #181825;
       border-radius: 4px;
+      border: 2px solid #07070a;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--neon-green);
+      background: var(--accent-cyan);
     }
   </style>
 </head>
-<body class="text-gray-200 min-h-screen flex flex-col font-sans antialiased selection:bg-green-500/30 selection:text-green-300">
+<body class="text-zinc-300 min-h-screen flex flex-col antialiased selection:bg-cyan-500/20 selection:text-cyan-300">
   
   <!-- Header -->
-  <header class="w-full border-b border-green-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+  <header class="w-full border-b border-white/5 bg-zinc-950/40 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
     <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-8 h-8 rounded bg-green-500/10 border border-green-500/30 flex items-center justify-center font-mono text-green-400 font-bold group-hover:border-green-400 group-hover:shadow-[0_0_10px_rgba(57,255,20,0.3)] transition-all">
+        <div class="w-8.5 h-8.5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono text-cyan-400 font-bold group-hover:border-cyan-400/50 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.25)] group-hover:bg-cyan-950/20 transition-all duration-300">
           &gt;_
         </div>
-        <span class="text-2xl font-bold font-mono text-green-400 tracking-wider group-hover:text-green-300 transition-colors">
-          CTF Writeups
+        <span class="text-xl font-extrabold font-outfit text-white tracking-tight group-hover:text-cyan-400 transition-colors duration-300">
+          CTF <span class="text-cyan-400 group-hover:text-white transition-colors duration-300">Writeups</span>
         </span>
       </a>
-      <nav class="flex items-center gap-6">
-        <a href="/" class="text-sm font-medium hover:text-green-400 transition-colors">CTFs</a>
+      <nav class="flex items-center gap-6 font-outfit">
+        <a href="/" class="text-sm font-semibold text-zinc-400 hover:text-cyan-400 transition-colors duration-300">CTFs</a>
       </nav>
     </div>
   </header>
 
   <!-- Main Grid -->
-  <main class="flex-grow max-w-6xl w-full mx-auto px-6 py-8">
+  <main class="flex-grow max-w-6xl w-full mx-auto px-6 py-10">
     <slot />
   </main>
 
   <!-- Footer -->
-  <footer class="w-full py-8 border-t border-green-500/10 bg-black/40 text-center text-sm text-gray-500 font-mono">
+  <footer class="w-full py-10 border-t border-white/5 bg-zinc-950/10 text-center text-xs text-zinc-500 font-mono">
     <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
       <p>© {new Date().getFullYear()} Aditya Pidurkar</p>
       <div class="flex gap-4">
-        <a href="https://github.com/itsadityapidurkar/ctf-writeups" target="_blank" class="hover:text-green-400 transition-colors">GitHub Repository</a>
+        <a href="https://github.com/itsadityapidurkar/ctf-writeups" target="_blank" class="hover:text-cyan-400 transition-colors duration-300">GitHub Repository</a>
       </div>
     </div>
   </footer>
