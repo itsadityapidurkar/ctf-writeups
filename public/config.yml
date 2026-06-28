@@ -14,7 +14,9 @@ collections:
     folder: "src/content/writeups"
     create: true
     slug: "{{slug}}"
-    nested: { depth: 3 }
+    nested:
+      depth: 3
+      subfolders: false
     path: "{{ctfId}}/{{category}}/{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
@@ -24,3 +26,21 @@ collections:
       - { label: "Flag", name: "flag", widget: "string", required: false }
       - { label: "Banner Image Filename", name: "banner", widget: "string", default: "placeholder.png", hint: "Filename of the banner in assets/, e.g., picoctf.png" }
       - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "settings"
+    label: "Settings"
+    delete: false
+    files:
+      - name: "ctfs"
+        label: "CTF List"
+        file: "src/data/ctfs.json"
+        fields:
+          - name: "ctfs"
+            label: "CTF Events"
+            widget: "list"
+            summary: "{{fields.name}} ({{fields.status}})"
+            fields:
+              - { label: "CTF ID", name: "id", widget: "string", hint: "Lowercase, matching directory name, e.g., picoctf" }
+              - { label: "CTF Name", name: "name", widget: "string", hint: "Display name, e.g., picoCTF" }
+              - { label: "Status", name: "status", widget: "select", options: ["active", "ended"] }
+              - { label: "Banner Image", name: "banner", widget: "string", default: "placeholder.png", hint: "Filename in assets/, e.g., picoctf.png" }

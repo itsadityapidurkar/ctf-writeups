@@ -7,7 +7,7 @@ import ctfsData from '../data/ctfs.json';
 const allWriteups = await getCollection('writeups');
 
 // Process and count writeups for each CTF
-const ctfs = ctfsData.map(ctf => {
+const ctfs = ctfsData.ctfs.map(ctf => {
   const ctfWriteups = allWriteups.filter(w => {
     // Resolve CTF ID from frontmatter or the first directory in the slug
     const resolvedCtfId = w.data.ctfId || w.slug.split('/')[0].toLowerCase();

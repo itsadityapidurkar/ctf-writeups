@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import ctfsData from '../../data/ctfs.json';
 
 export async function getStaticPaths() {
-  return ctfsData.map(ctf => ({
+  return ctfsData.ctfs.map(ctf => ({
     params: { ctfId: ctf.id },
     props: { ctf }
   }));

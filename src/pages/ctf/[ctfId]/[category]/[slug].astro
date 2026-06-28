@@ -30,7 +30,7 @@ const { writeup, ctfId, categoryName } = Astro.props;
 const { Content } = await writeup.render();
 
 // Look up the full CTF name
-const ctfMeta = ctfsData.find(c => c.id === ctfId);
+const ctfMeta = ctfsData.ctfs.find(c => c.id === ctfId);
 const ctfName = ctfMeta ? ctfMeta.name : ctfId;
 
 // Resolve frontmatter properties with path-based fallbacks
