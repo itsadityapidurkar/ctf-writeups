@@ -42,10 +42,15 @@ export default async function handler(req, res) {
         <script>
           const target = window.opener || window.parent;
           if (target) {
+            // 1. Signal to Decap CMS that authorization has started (required handshake)
+            target.postMessage("authorizing:github", "*");
+            
+            // 2. Send the successful access token
             target.postMessage(
               'authorization:github:success:${JSON.stringify({ token, provider: "github" })}',
               '*'
             );
+            
             setTimeout(() => {
               window.close();
             }, 100);
