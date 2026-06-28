@@ -103,9 +103,7 @@ const searchData = ctfs.map(c => ({
 <script src="https://unpkg.com/lunr/lunr.js" is:inline></script>
 
 <!-- Embedded variables for client-side search -->
-<script is:inline define:vars={{ searchData }}></script>
-
-<script is:inline>
+<script is:inline define:vars={{ searchData }}>
   let ctfs = searchData || [];
   let idx = null;
   const grid = document.getElementById("ctf-grid");
