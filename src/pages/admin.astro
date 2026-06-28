@@ -24,6 +24,9 @@
       .then(yamlText => {
         const config = jsyaml.load(yamlText);
         
+        // Prevent Decap CMS from loading the config file again automatically and causing duplicate collections
+        config.load_config_file = false;
+        
         // Dynamically match base_url to current domain (localhost, Vercel subdomain, or custom domain)
         config.backend.base_url = window.location.origin;
         
