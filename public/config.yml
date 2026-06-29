@@ -31,6 +31,17 @@ collections:
     label: "Settings"
     delete: false
     files:
+      - name: "general"
+        label: "General Configuration"
+        file: "src/data/settings.json"
+        fields:
+          - { label: "Site Title", name: "siteTitle", widget: "string" }
+          - { label: "Author Name", name: "author", widget: "string" }
+          - { label: "SEO Description", name: "description", widget: "text" }
+          - { label: "GitHub URL", name: "githubUrl", widget: "string" }
+          - { label: "Homepage Hero Title", name: "heroTitle", widget: "string" }
+          - { label: "Homepage Hero Subtitle", name: "heroSubtitle", widget: "text" }
+
       - name: "ctfs"
         label: "CTF List"
         file: "src/data/ctfs.json"

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import ctfsData from '../data/ctfs.json';
+import settingsData from '../data/settings.json';
 
 // Fetch all writeups from content collections
 const allWriteups = await getCollection('writeups');
@@ -70,10 +71,10 @@ const searchData = ctfs.map(c => ({
           SYSTEM_ARCHIVE_ACTIVE
         </span>
         <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white font-outfit leading-tight">
-          Security Writeups <br class="hidden sm:inline"/>& <span class="text-gradient-cyan">Exploit Analysis</span>
+          {settingsData.heroTitle}
         </h1>
         <p class="text-zinc-400 text-base sm:text-lg font-light leading-relaxed">
-          A premium repository of solved CTF challenges, cryptographic walkthroughs, vulnerability reports, and binary exploits, archived for security researchers and enthusiasts.
+          {settingsData.heroSubtitle}
         </p>
       </div>
     </div>
