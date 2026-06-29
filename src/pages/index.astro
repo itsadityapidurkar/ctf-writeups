@@ -1,14 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import ctfsData from '../data/ctfs.json';
 import settingsData from '../data/settings.json';
+
+// Fetch all CTF files dynamically
+const ctfFiles = await Astro.glob('../data/ctfs/*.json');
+const ctfsList = ctfFiles.map(file => file.default);
 
 // Fetch all writeups from content collections
 const allWriteups = await getCollection('writeups');
 
 // Process and count writeups for each CTF
-const ctfs = ctfsData.ctfs.map(ctf => {
+const ctfs = ctfsList.map(ctf => {
   const ctfWriteups = allWriteups.filter(w => {
     // Resolve CTF ID from frontmatter or the first directory in the slug
     const resolvedCtfId = w.data.ctfId || w.slug.split('/')[0].toLowerCase();

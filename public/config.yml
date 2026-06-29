@@ -27,6 +27,20 @@ collections:
       - { label: "Banner Image Filename", name: "banner", widget: "string", default: "placeholder.png", hint: "Filename of the banner in assets/, e.g., picoctf.png" }
       - { label: "Body", name: "body", widget: "markdown" }
 
+  - name: "ctfs"
+    label: "CTFs"
+    folder: "src/data/ctfs"
+    create: true
+    extension: "json"
+    format: "json"
+    slug: "{{id}}"
+    identifier_field: "name"
+    fields:
+      - { label: "CTF ID", name: "id", widget: "string", hint: "Lowercase, matching directory name, e.g., picoctf" }
+      - { label: "CTF Name", name: "name", widget: "string", hint: "Display name, e.g., picoCTF" }
+      - { label: "Status", name: "status", widget: "select", options: ["active", "ended"] }
+      - { label: "Banner Image", name: "banner", widget: "string", default: "placeholder.png", hint: "Filename in assets/, e.g., picoctf.png" }
+
   - name: "settings"
     label: "Settings"
     delete: false
@@ -41,17 +55,3 @@ collections:
           - { label: "GitHub URL", name: "githubUrl", widget: "string" }
           - { label: "Homepage Hero Title", name: "heroTitle", widget: "string" }
           - { label: "Homepage Hero Subtitle", name: "heroSubtitle", widget: "text" }
-
-      - name: "ctfs"
-        label: "CTF List"
-        file: "src/data/ctfs.json"
-        fields:
-          - name: "ctfs"
-            label: "CTF Events"
-            widget: "list"
-            summary: "{{fields.name}} ({{fields.status}})"
-            fields:
-              - { label: "CTF ID", name: "id", widget: "string", hint: "Lowercase, matching directory name, e.g., picoctf" }
-              - { label: "CTF Name", name: "name", widget: "string", hint: "Display name, e.g., picoCTF" }
-              - { label: "Status", name: "status", widget: "select", options: ["active", "ended"] }
-              - { label: "Banner Image", name: "banner", widget: "string", default: "placeholder.png", hint: "Filename in assets/, e.g., picoctf.png" }

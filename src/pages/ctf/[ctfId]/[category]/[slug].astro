@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import WriteupLayout from '../../../../layouts/WriteupLayout.astro';
-import ctfsData from '../../../../data/ctfs.json';
 
 export async function getStaticPaths() {
   const allWriteups = await getCollection('writeups');
@@ -29,8 +28,10 @@ export async function getStaticPaths() {
 const { writeup, ctfId, categoryName } = Astro.props;
 const { Content } = await writeup.render();
 
-// Look up the full CTF name
-const ctfMeta = ctfsData.ctfs.find(c => c.id === ctfId);
+// Look up the full CTF metadata dynamically using import.meta.glob
+const ctfFiles = import.meta.glob('../../../../data/ctfs/*.json', { eager: true });
+const ctfsList = Object.values(ctfFiles).map(file => (file as any).default);
+const ctfMeta = ctfsList.find(c => c.id === ctfId);
 const ctfName = ctfMeta ? ctfMeta.name : ctfId;
 
 // Resolve frontmatter properties with path-based fallbacks

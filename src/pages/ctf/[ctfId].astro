@@ -1,10 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import ctfsData from '../../data/ctfs.json';
+const ctfFiles = import.meta.glob('../../data/ctfs/*.json', { eager: true });
+const ctfsList = Object.values(ctfFiles).map(file => file.default);
 
 export async function getStaticPaths() {
-  return ctfsData.ctfs.map(ctf => ({
+  const ctfFiles = import.meta.glob('../../data/ctfs/*.json', { eager: true });
+  const ctfsList = Object.values(ctfFiles).map(file => file.default);
+  return ctfsList.map(ctf => ({
     params: { ctfId: ctf.id },
     props: { ctf }
   }));
