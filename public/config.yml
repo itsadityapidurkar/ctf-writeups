@@ -20,7 +20,13 @@ collections:
     path: "{{ctfId}}/{{category}}/{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "CTF ID", name: "ctfId", widget: "string", hint: "Matching folder name, e.g., picoctf, imaginaryctf" }
+      - label: "CTF Event"
+        name: "ctfId"
+        widget: "relation"
+        collection: "ctfs"
+        value_field: "id"
+        display_fields: ["name"]
+        search_fields: ["name", "id"]
       - { label: "Category", name: "category", widget: "string", hint: "Category folder name, lowercase and hyphenated, e.g., general-skills, forensics" }
       - { label: "Difficulty", name: "difficulty", widget: "select", options: ["Easy", "Medium", "Hard"], required: false }
       - { label: "Flag", name: "flag", widget: "string", required: false }
